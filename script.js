@@ -14,8 +14,9 @@ document
     const name = document.getElementById("name").value;
     const email = document.getElementById("email").value;
     const feedback = document.getElementById("feedback").value;
+    const rating = document.getElementById("rating").value;
 
-    if (!name || !email || !feedback) {
+    if (!name || !email || !feedback || !rating) {
       alert("All fields are required!");
       return;
     }
@@ -29,6 +30,7 @@ document
       name: name,
       email: email,
       feedback: feedback,
+      rating: rating,
     };
 
     saveFeedback(feedbackData);
@@ -63,7 +65,9 @@ function displayFeedback() {
     feedbackElement.innerHTML = `
             <strong>${item.name}</strong> (${item.email})<br>
             <p>${item.feedback}</p>
+            <p>Rating: ${item.rating}</p>
             <button onclick="editFeedback(${i})">Edit</button>
+            <button onclick="deleteFeedback(${i})">Delete</button>
             <hr>
         `;
     feedbackContainer.appendChild(feedbackElement);
@@ -105,6 +109,7 @@ function editFeedback(index) {
   document.getElementById("name").value = item.name;
   document.getElementById("email").value = item.email;
   document.getElementById("feedback").value = item.feedback;
+  document.getElementById("rating").value = item.rating;
 
   document
     .getElementById("feedbackForm")
@@ -118,8 +123,9 @@ function editFeedback(index) {
       const name = document.getElementById("name").value;
       const email = document.getElementById("email").value;
       const feedback = document.getElementById("feedback").value;
+      const rating = document.getElementById("rating").value;
 
-      if (!name || !email || !feedback) {
+      if (!name || !email || !feedback || !rating) {
         alert("All fields are required!");
         return;
       }
@@ -133,6 +139,7 @@ function editFeedback(index) {
         name: name,
         email: email,
         feedback: feedback,
+        rating: rating,
       };
 
       localStorage.setItem("feedbackList", JSON.stringify(feedbackList));
@@ -146,31 +153,9 @@ function editFeedback(index) {
     });
 }
 
-function handleSubmit(event) {
-  event.preventDefault();
-
-  const name = document.getElementById("name").value;
-  const email = document.getElementById("email").value;
-  const feedback = document.getElementById("feedback").value;
-
-  if (!name || !email || !feedback) {
-    alert("All fields are required!");
-    return;
-  }
-
-  if (!validateEmail(email)) {
-    alert("Invalid email format!");
-    return;
-  }
-
-  const feedbackData = {
-    name: name,
-    email: email,
-    feedback: feedback,
-  };
-
-  saveFeedback(feedbackData);
+function deleteFeedback(index) {
+  let feedbackList = JSON.parse(localStorage.getItem("feedbackList")) || [];
+  feedbackList.splice(index, 1);
+  localStorage.setItem("feedbackList", JSON.stringify(feedbackList));
   displayFeedback();
-
-  alert("Feedback submitted!");
 }
