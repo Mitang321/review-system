@@ -3,37 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Feedback Form</title>
+    <title>Feedback System</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <h1>Feedback Form</h1>
-    <div id="auth">
+    <div id="auth" class="container">
       <h2>Login</h2>
       <form id="loginForm">
         <label for="username">Username:</label>
-        <input type="text" id="username" required /><br /><br />
+        <input type="text" id="username" required /><br />
         <label for="password">Password:</label>
-        <input type="password" id="password" required /><br /><br />
+        <input type="password" id="password" required /><br />
         <button type="submit">Login</button>
       </form>
     </div>
-    <div id="adminSection" style="display: none">
-      <h2>Admin Panel</h2>
-      <button id="viewUsers">View Users</button>
-      <button id="viewFeedback">View Feedback</button>
-      <div id="feedbackList"></div>
-    </div>
-    <div id="userSection" style="display: none">
-      <h1>Feedback Form</h1>
+
+    <div id="userSection" class="container" style="display: none">
+      <h2>Submit Feedback</h2>
       <form id="feedbackForm">
         <label for="name">Name:</label>
-        <input type="text" id="name" required /><br /><br />
+        <input type="text" id="name" required /><br />
         <label for="email">Email:</label>
-        <input type="email" id="email" required /><br /><br />
-        <label for="feedback">Feedback:</label><br />
-        <textarea id="feedback" rows="4" cols="50" required></textarea
-        ><br /><br />
+        <input type="email" id="email" required /><br />
+        <label for="feedback">Feedback:</label>
+        <textarea id="feedback" rows="4" required></textarea><br />
         <label for="rating">Rating:</label>
         <select id="rating" required>
           <option value="1">1</option>
@@ -41,17 +34,27 @@
           <option value="3">3</option>
           <option value="4">4</option>
           <option value="5">5</option></select
-        ><br /><br />
+        ><br />
         <button type="submit">Submit</button>
       </form>
-      <h2>Submitted Feedback</h2>
+      <h3>Submitted Feedback</h3>
       <div id="feedbackListUser"></div>
       <div id="pagination">
         <button id="prevPage">Previous</button>
         <span id="pageInfo"></span>
         <button id="nextPage">Next</button>
       </div>
+      <button id="logoutButtonUser">Logout</button>
     </div>
+
+    <div id="adminSection" class="container" style="display: none">
+      <h2>Admin Panel</h2>
+      <button id="viewUsers">View Users</button>
+      <button id="viewFeedback">View Feedback</button>
+      <button id="logoutButtonAdmin">Logout</button>
+      <div id="feedbackList"></div>
+    </div>
+
     <script src="script.js"></script>
   </body>
 </html>

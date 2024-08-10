@@ -15,71 +15,88 @@ document.addEventListener("DOMContentLoaded", function () {
       displayFeedbackUser();
     }
   } else {
+    document.getElementById("auth").style.display = "block";
     document.getElementById("adminSection").style.display = "none";
     document.getElementById("userSection").style.display = "none";
   }
-});
 
-document
-  .getElementById("loginForm")
-  .addEventListener("submit", function (event) {
-    event.preventDefault();
+  document
+    .getElementById("loginForm")
+    .addEventListener("submit", function (event) {
+      event.preventDefault();
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      if (username === "admin" && password === "adminpass") {
+        localStorage.setItem("userLoggedIn", "true");
+        localStorage.setItem("userRole", "admin");
+        document.getElementById("auth").style.display = "none";
+        document.getElementById("adminSection").style.display = "block";
+        displayFeedbackAdmin();
+      } else if (username === "user" && password === "userpass") {
+        localStorage.setItem("userLoggedIn", "true");
+        localStorage.setItem("userRole", "user");
+        document.getElementById("auth").style.display = "none";
+        document.getElementById("userSection").style.display = "block";
+        displayFeedbackUser();
+      } else {
+        alert("Invalid username or password");
+      }
+    });
 
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-
-    if (username === "admin" && password === "adminpass") {
-      localStorage.setItem("userLoggedIn", "true");
-      localStorage.setItem("userRole", "admin");
-      document.getElementById("auth").style.display = "none";
-      document.getElementById("adminSection").style.display = "block";
-      displayFeedbackAdmin();
-    } else if (username === "user" && password === "userpass") {
-      localStorage.setItem("userLoggedIn", "true");
-      localStorage.setItem("userRole", "user");
-      document.getElementById("auth").style.display = "none";
-      document.getElementById("userSection").style.display = "block";
+  document
+    .getElementById("feedbackForm")
+    .addEventListener("submit", function (event) {
+      event.preventDefault();
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const feedback = document.getElementById("feedback").value;
+      const rating = document.getElementById("rating").value;
+      if (!name || !email || !feedback || !rating) {
+        alert("All fields are required!");
+        return;
+      }
+      if (!validateEmail(email)) {
+        alert("Invalid email format!");
+        return;
+      }
+      const feedbackData = {
+        name: name,
+        email: email,
+        feedback: feedback,
+        rating: rating,
+      };
+      saveFeedback(feedbackData);
       displayFeedbackUser();
-    } else {
-      alert("Invalid username or password");
+      alert("Feedback submitted!");
+    });
+
+  document
+    .getElementById("logoutButtonAdmin")
+    .addEventListener("click", function () {
+      logout();
+    });
+
+  document
+    .getElementById("logoutButtonUser")
+    .addEventListener("click", function () {
+      logout();
+    });
+
+  document.getElementById("prevPage").addEventListener("click", function () {
+    if (currentPage > 1) {
+      currentPage--;
+      displayFeedbackUser();
     }
   });
 
-document
-  .getElementById("feedbackForm")
-  .addEventListener("submit", function (event) {
-    event.preventDefault();
-
-    const name = document.getElementById("name").value;
-    const email = document.getElementById("email").value;
-    const feedback = document.getElementById("feedback").value;
-    const rating = document.getElementById("rating").value;
-
-    if (!name || !email || !feedback || !rating) {
-      alert("All fields are required!");
-      return;
+  document.getElementById("nextPage").addEventListener("click", function () {
+    const feedbackList = JSON.parse(localStorage.getItem("feedbackList")) || [];
+    const totalPages = Math.ceil(feedbackList.length / itemsPerPage);
+    if (currentPage < totalPages) {
+      currentPage++;
+      displayFeedbackUser();
     }
-
-    if (!validateEmail(email)) {
-      alert("Invalid email format!");
-      return;
-    }
-
-    const feedbackData = {
-      name: name,
-      email: email,
-      feedback: feedback,
-      rating: rating,
-    };
-
-    saveFeedback(feedbackData);
-    displayFeedbackUser();
-
-    alert("Feedback submitted!");
   });
-
-document.getElementById("viewFeedback").addEventListener("click", function () {
-  displayFeedbackAdmin();
 });
 
 function validateEmail(email) {
@@ -97,46 +114,41 @@ function displayFeedbackAdmin() {
   const feedbackList = JSON.parse(localStorage.getItem("feedbackList")) || [];
   const feedbackContainer = document.getElementById("feedbackList");
   feedbackContainer.innerHTML = "";
-
-  for (let i = 0; i < feedbackList.length; i++) {
-    const item = feedbackList[i];
+  feedbackList.forEach((item, index) => {
     const feedbackElement = document.createElement("div");
     feedbackElement.classList.add("feedback-item");
     feedbackElement.innerHTML = `
             <strong>${item.name}</strong> (${item.email})<br>
-            <p>${item.feedback}</p>
-            <p>Rating: ${item.rating}</p>
-            <button onclick="editFeedback(${i})">Edit</button>
-            <button onclick="deleteFeedback(${i})">Delete</button>
+            Feedback: ${item.feedback}<br>
+            Rating: ${item.rating}<br>
+            <button onclick="editFeedback(${index})">Edit</button>
+            <button onclick="deleteFeedback(${index})">Delete</button>
             <hr>
         `;
     feedbackContainer.appendChild(feedbackElement);
-  }
+  });
 }
 
 function displayFeedbackUser() {
   const feedbackList = JSON.parse(localStorage.getItem("feedbackList")) || [];
   const feedbackContainer = document.getElementById("feedbackListUser");
   feedbackContainer.innerHTML = "";
-
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, feedbackList.length);
-
   for (let i = startIndex; i < endIndex; i++) {
     const item = feedbackList[i];
     const feedbackElement = document.createElement("div");
     feedbackElement.classList.add("feedback-item");
     feedbackElement.innerHTML = `
             <strong>${item.name}</strong> (${item.email})<br>
-            <p>${item.feedback}</p>
-            <p>Rating: ${item.rating}</p>
+            Feedback: ${item.feedback}<br>
+            Rating: ${item.rating}<br>
             <button onclick="editFeedback(${i})">Edit</button>
             <button onclick="deleteFeedback(${i})">Delete</button>
             <hr>
         `;
     feedbackContainer.appendChild(feedbackElement);
   }
-
   updatePageInfo();
 }
 
@@ -169,48 +181,38 @@ function updatePageInfo() {
 function editFeedback(index) {
   const feedbackList = JSON.parse(localStorage.getItem("feedbackList")) || [];
   const item = feedbackList[index];
-
   document.getElementById("name").value = item.name;
   document.getElementById("email").value = item.email;
   document.getElementById("feedback").value = item.feedback;
   document.getElementById("rating").value = item.rating;
-
   document
     .getElementById("feedbackForm")
     .removeEventListener("submit", handleSubmit);
-
   document
     .getElementById("feedbackForm")
     .addEventListener("submit", function (event) {
       event.preventDefault();
-
       const name = document.getElementById("name").value;
       const email = document.getElementById("email").value;
       const feedback = document.getElementById("feedback").value;
       const rating = document.getElementById("rating").value;
-
       if (!name || !email || !feedback || !rating) {
         alert("All fields are required!");
         return;
       }
-
       if (!validateEmail(email)) {
         alert("Invalid email format!");
         return;
       }
-
       feedbackList[index] = {
         name: name,
         email: email,
         feedback: feedback,
         rating: rating,
       };
-
       localStorage.setItem("feedbackList", JSON.stringify(feedbackList));
       displayFeedbackUser();
-
       alert("Feedback updated!");
-
       document
         .getElementById("feedbackForm")
         .addEventListener("submit", handleSubmit);
@@ -230,4 +232,12 @@ function isUserLoggedIn() {
 
 function isAdmin() {
   return localStorage.getItem("userRole") === "admin";
+}
+
+function logout() {
+  localStorage.removeItem("userLoggedIn");
+  localStorage.removeItem("userRole");
+  document.getElementById("auth").style.display = "block";
+  document.getElementById("adminSection").style.display = "none";
+  document.getElementById("userSection").style.display = "none";
 }
