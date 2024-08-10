@@ -98,3 +98,31 @@ button:hover {
 .feedback-item button:hover {
   background-color: #d32f2f;
 }
+#auth,
+#feedbackSection {
+  text-align: center;
+}
+
+#auth form,
+#feedbackForm {
+  display: inline-block;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+#feedbackSection {
+  display: none;
+}
+#auth,
+#adminSection,
+#userSection {
+  text-align: center;
+}
+
+#auth form,
+#feedbackForm,
+#adminSection button {
+  display: inline-block;
+  max-width: 300px;
+  margin: 0 auto;
+}

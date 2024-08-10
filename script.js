@@ -2,9 +2,48 @@ const itemsPerPage = 5;
 let currentPage = 1;
 
 document.addEventListener("DOMContentLoaded", function () {
-  displayFeedback();
-  setupPagination();
+  if (isUserLoggedIn()) {
+    if (isAdmin()) {
+      document.getElementById("auth").style.display = "none";
+      document.getElementById("adminSection").style.display = "block";
+      document.getElementById("userSection").style.display = "none";
+      displayFeedbackAdmin();
+    } else {
+      document.getElementById("auth").style.display = "none";
+      document.getElementById("adminSection").style.display = "none";
+      document.getElementById("userSection").style.display = "block";
+      displayFeedbackUser();
+    }
+  } else {
+    document.getElementById("adminSection").style.display = "none";
+    document.getElementById("userSection").style.display = "none";
+  }
 });
+
+document
+  .getElementById("loginForm")
+  .addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    if (username === "admin" && password === "adminpass") {
+      localStorage.setItem("userLoggedIn", "true");
+      localStorage.setItem("userRole", "admin");
+      document.getElementById("auth").style.display = "none";
+      document.getElementById("adminSection").style.display = "block";
+      displayFeedbackAdmin();
+    } else if (username === "user" && password === "userpass") {
+      localStorage.setItem("userLoggedIn", "true");
+      localStorage.setItem("userRole", "user");
+      document.getElementById("auth").style.display = "none";
+      document.getElementById("userSection").style.display = "block";
+      displayFeedbackUser();
+    } else {
+      alert("Invalid username or password");
+    }
+  });
 
 document
   .getElementById("feedbackForm")
@@ -34,10 +73,14 @@ document
     };
 
     saveFeedback(feedbackData);
-    displayFeedback();
+    displayFeedbackUser();
 
     alert("Feedback submitted!");
   });
+
+document.getElementById("viewFeedback").addEventListener("click", function () {
+  displayFeedbackAdmin();
+});
 
 function validateEmail(email) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -50,9 +93,30 @@ function saveFeedback(feedback) {
   localStorage.setItem("feedbackList", JSON.stringify(feedbackList));
 }
 
-function displayFeedback() {
+function displayFeedbackAdmin() {
   const feedbackList = JSON.parse(localStorage.getItem("feedbackList")) || [];
   const feedbackContainer = document.getElementById("feedbackList");
+  feedbackContainer.innerHTML = "";
+
+  for (let i = 0; i < feedbackList.length; i++) {
+    const item = feedbackList[i];
+    const feedbackElement = document.createElement("div");
+    feedbackElement.classList.add("feedback-item");
+    feedbackElement.innerHTML = `
+            <strong>${item.name}</strong> (${item.email})<br>
+            <p>${item.feedback}</p>
+            <p>Rating: ${item.rating}</p>
+            <button onclick="editFeedback(${i})">Edit</button>
+            <button onclick="deleteFeedback(${i})">Delete</button>
+            <hr>
+        `;
+    feedbackContainer.appendChild(feedbackElement);
+  }
+}
+
+function displayFeedbackUser() {
+  const feedbackList = JSON.parse(localStorage.getItem("feedbackList")) || [];
+  const feedbackContainer = document.getElementById("feedbackListUser");
   feedbackContainer.innerHTML = "";
 
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -80,7 +144,7 @@ function setupPagination() {
   document.getElementById("prevPage").addEventListener("click", function () {
     if (currentPage > 1) {
       currentPage--;
-      displayFeedback();
+      displayFeedbackUser();
     }
   });
 
@@ -89,7 +153,7 @@ function setupPagination() {
     const totalPages = Math.ceil(feedbackList.length / itemsPerPage);
     if (currentPage < totalPages) {
       currentPage++;
-      displayFeedback();
+      displayFeedbackUser();
     }
   });
 }
@@ -143,7 +207,7 @@ function editFeedback(index) {
       };
 
       localStorage.setItem("feedbackList", JSON.stringify(feedbackList));
-      displayFeedback();
+      displayFeedbackUser();
 
       alert("Feedback updated!");
 
@@ -157,5 +221,13 @@ function deleteFeedback(index) {
   let feedbackList = JSON.parse(localStorage.getItem("feedbackList")) || [];
   feedbackList.splice(index, 1);
   localStorage.setItem("feedbackList", JSON.stringify(feedbackList));
-  displayFeedback();
+  displayFeedbackUser();
+}
+
+function isUserLoggedIn() {
+  return localStorage.getItem("userLoggedIn") === "true";
+}
+
+function isAdmin() {
+  return localStorage.getItem("userRole") === "admin";
 }
